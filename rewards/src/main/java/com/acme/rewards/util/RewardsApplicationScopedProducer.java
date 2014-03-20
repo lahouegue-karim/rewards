@@ -16,9 +16,14 @@
 
 package com.acme.rewards.util;
 
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.inject.Produces;
+import javax.inject.Inject;
+import javax.persistence.EntityManagerFactory;
+import javax.persistence.Persistence;
+import javax.persistence.PersistenceUnit;
+
 import org.jbpm.runtime.manager.impl.cdi.InjectableRegisterableItemsFactory;
-import org.kie.api.KieServices;
-import org.kie.api.builder.ReleaseId;
 import org.kie.api.io.ResourceType;
 import org.kie.api.runtime.manager.RuntimeEnvironment;
 import org.kie.api.runtime.manager.RuntimeEnvironmentBuilder;
@@ -28,52 +33,46 @@ import org.kie.internal.runtime.manager.cdi.qualifier.PerProcessInstance;
 import org.kie.internal.runtime.manager.cdi.qualifier.PerRequest;
 import org.kie.internal.runtime.manager.cdi.qualifier.Singleton;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.inject.Produces;
-import javax.inject.Inject;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
-import javax.persistence.PersistenceUnit;
-
 @ApplicationScoped
 public class RewardsApplicationScopedProducer {
 
-    @Inject
-    private InjectableRegisterableItemsFactory factory;
+	@Inject
+	private InjectableRegisterableItemsFactory factory;
 
-    @Inject @Rewards
-    private UserGroupCallback usergroupCallback;
+	@Inject
+	@Rewards
+	private UserGroupCallback usergroupCallback;
 
-    @PersistenceUnit(unitName = "rewards")
-    private EntityManagerFactory emf;
+	@PersistenceUnit(unitName = "rewards")
+	private EntityManagerFactory emf;
 
-    @Produces
-    public EntityManagerFactory produceEntityManagerFactory() {
-        if (this.emf == null) {
-            this.emf = Persistence
-                    .createEntityManagerFactory("rewards");
-        }
-        return this.emf;
-    }
+	@Produces
+	public EntityManagerFactory produceEntityManagerFactory() {
+		if (this.emf == null) {
+			this.emf = Persistence.createEntityManagerFactory("rewards");
+		}
+		return this.emf;
+	}
 
-    @Produces
-    @Singleton
-    @PerProcessInstance
-    @PerRequest
-    public RuntimeEnvironment produceEnvironment(EntityManagerFactory emf) {
-        RuntimeEnvironment environment = RuntimeEnvironmentBuilder.Factory.get()
-                .newDefaultInMemoryBuilder()
-                .addAsset(ResourceFactory.newClassPathResource("rewards.bpmn2"), ResourceType.BPMN2)
-                .entityManagerFactory(emf)
-                .userGroupCallback(usergroupCallback)
-                .registerableItemsFactory(factory)
-                .get();
-        return environment;
-    }
+	@Produces
+	@Singleton
+	@PerProcessInstance
+	@PerRequest
+	public RuntimeEnvironment produceEnvironment(EntityManagerFactory emf) {
+		RuntimeEnvironment environment = RuntimeEnvironmentBuilder.Factory
+				.get()
+				.newDefaultInMemoryBuilder()
+				.addAsset(
+						ResourceFactory.newClassPathResource("rewards.bpmn2"),
+						ResourceType.BPMN2).entityManagerFactory(emf)
+				.userGroupCallback(usergroupCallback)
+				.registerableItemsFactory(factory).get();
+		return environment;
+	}
 
-    @Produces
-    public UserGroupCallback produceUserGroupCallback() {
-        return new RewardsUserGroupCallback();
-    }
+	@Produces
+	public UserGroupCallback produceUserGroupCallback() {
+		return new RewardsUserGroupCallback();
+	}
 
 }
