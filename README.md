@@ -18,3 +18,5 @@ steps
 
 2)move to rewards folder and execute
 > mvn clean jboss-as:deploy
+
+3)visit http://localhost:8080/rewards
